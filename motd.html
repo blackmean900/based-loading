@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Based Z-City</title>
+<!--
+    Based Z-City - ULX MOTD
+    ---------------------------------------------------------------------------
+    Opens automatically when a player joins (ULX's built-in MOTD system,
+    mode 3 = URL). Same visual language as the loading screen: near-black,
+    gold, a little red, a night city skyline.
+
+    No rules section on purpose - the server runs on free speech, no chat
+    rules. The one line under Getting Started is about cheating, not speech.
+
+    Written plain (no build step): ES5 JS, -webkit- prefixes kept, so it also
+    works in GMod's older embedded browser.
+-->
+<style>
+html, body { margin: 0; padding: 0; background: #0b0b0e; color: #e4e4ea; font-family: "Segoe UI", Tahoma, Arial, sans-serif; font-size: 15px; }
+body { padding-bottom: 40px; }
+
+#bg { position: fixed; left: 0; top: 0; right: 0; height: 340px; z-index: -2;
+    background-image: -webkit-radial-gradient(50% 10%, circle cover, #26242a 0%, #141419 45%, #08080a 100%);
+    background-image: radial-gradient(circle at 50% 10%, #26242a 0%, #141419 45%, #08080a 100%); }
+#rain { position: fixed; left: -10%; top: 0; width: 120%; height: 340px; z-index: -1; opacity: 0.5;
+    background-image: -webkit-repeating-linear-gradient(105deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 17px);
+    background-image: repeating-linear-gradient(105deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 17px); }
+svg#sky { position: fixed; left: 0; top: 140px; width: 100%; height: 200px; z-index: -1; }
+
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 22px; position: relative; }
+
+#header { text-align: center; padding-top: 46px; }
+.impact { font-family: Impact, "Arial Black", "Franklin Gothic Heavy", sans-serif; }
+.gold { color: #ffd14a; text-shadow: 0 0 0.35em rgba(255,190,40,0.35), 0 0.04em 0 #a8791a, 0 0.09em 0.12em rgba(0,0,0,0.8); }
+#header .based { font-size: 74px; line-height: 1; letter-spacing: 0.05em; margin-left: 0.05em; }
+#header .zc { font-size: 26px; letter-spacing: 0.5em; margin-left: 0.5em; color: #f2f2f6; margin-top: 4px; text-shadow: 0 2px 8px rgba(0,0,0,0.9); }
+#header .rule { width: 320px; height: 3px; margin: 14px auto 10px auto;
+    background-image: -webkit-linear-gradient(left, rgba(214,90,90,0), #d65a5a 20%, #ffd14a 50%, #d65a5a 80%, rgba(214,90,90,0));
+    background-image: linear-gradient(to right, rgba(214,90,90,0), #d65a5a 20%, #ffd14a 50%, #d65a5a 80%, rgba(214,90,90,0)); }
+#header .tag { font-size: 13px; letter-spacing: 0.3em; margin-left: 0.3em; color: #c9c9d2; }
+#header .tag b { color: #e0605f; }
+
+.card { background: rgba(20,20,25,0.92); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
+    padding: 20px 22px; margin-top: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
+.card h2 { margin: 0 0 12px 0; font-size: 14px; letter-spacing: 0.18em; color: #ffd14a; font-weight: 700;
+    text-transform: uppercase; }
+.card h2 .ic { margin-right: 8px; }
+.card p { margin: 0 0 10px 0; color: #c9c9d2; line-height: 1.55; }
+.card p:last-child { margin-bottom: 0; }
+.card ul { margin: 0; padding-left: 20px; color: #d6d6de; line-height: 1.7; }
+.two { display: table; width: 100%; border-spacing: 14px 0; margin-left: -14px; width: calc(100% + 14px); }
+.two .col { display: table-cell; width: 50%; vertical-align: top; }
+.mini { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px 16px; }
+.mini h3 { margin: 0 0 8px 0; font-size: 12px; letter-spacing: 0.1em; color: #f2f2f6; text-transform: uppercase; }
+
+.copyrow { display: table; width: 100%; margin-top: 8px; }
+.copyrow .box { display: table-cell; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px 0 0 6px; padding: 10px 12px; font-family: Consolas, "Courier New", monospace; font-size: 13px;
+    color: #e4e4ea; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.copyrow .btn { display: table-cell; width: 1px; white-space: nowrap; }
+.copyrow .btn button { height: 100%; padding: 0 16px; border: 1px solid #ffd14a; border-left: none; border-radius: 0 6px 6px 0;
+    background: #ffd14a; color: #1a1408; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; cursor: pointer; }
+.copyrow .btn button:hover { background: #ffdb70; }
+.copyrow .btn button.done { background: #7ac768; border-color: #7ac768; color: #0e1a08; }
+
+.grid { display: table; width: 100%; border-spacing: 0 8px; }
+.grow { display: table-row; }
+.key { display: table-cell; width: 118px; padding-right: 12px; vertical-align: top; }
+.key span { display: inline-block; min-width: 44px; text-align: center; background: rgba(255,209,74,0.12);
+    border: 1px solid rgba(255,209,74,0.4); border-radius: 4px; padding: 3px 8px; font-family: Consolas, monospace;
+    font-size: 12px; font-weight: 700; color: #ffd14a; }
+.desc { display: table-cell; vertical-align: top; padding-top: 4px; color: #d6d6de; }
+
+.links { display: table; width: 100%; border-spacing: 10px 0; margin-left: -10px; width: calc(100% + 10px); }
+.links a { display: table-cell; text-align: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; padding: 14px 8px; color: #f2f2f6; text-decoration: none; font-size: 13px; font-weight: 600; }
+.links a:hover { background: rgba(255,209,74,0.08); border-color: rgba(255,209,74,0.35); }
+.links a .l1 { display: block; font-size: 20px; margin-bottom: 4px; }
+
+#foot { text-align: center; color: #6f6f7a; font-size: 12px; margin-top: 26px; letter-spacing: 0.05em; }
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="rain"></div>
+<svg id="sky" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 160" preserveAspectRatio="xMidYMax slice"></svg>
+
+<div class="wrap">
+    <div id="header">
+        <div class="based impact gold">BASED</div>
+        <div class="zc impact">Z-CITY</div>
+        <div class="rule"></div>
+        <div class="tag"><b>HOMICIDE</b> &nbsp;+&nbsp; CUSTOM MODES</div>
+    </div>
+
+    <div class="card">
+        <h2><span class="ic">⚡</span>GETTING STARTED</h2>
+        <div class="two">
+            <div class="col" style="padding-right:7px;">
+                <div class="mini">
+                    <h3>Quick checklist</h3>
+                    <ul>
+                        <li>Join the Discord for updates and support</li>
+                        <li>Subscribe to the Workshop collection so content downloads in the background</li>
+                        <li>Type <b>!guide</b> in chat for controls, injuries and every special round</li>
+                        <li>Favourite the server for quick reconnects</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col" style="padding-left:7px;">
+                <div class="mini">
+                    <h3>Good to know</h3>
+                    <ul>
+                        <li><b>Free speech server</b> - no chat rules, say what you want</li>
+                        <li>Cheats, hacks and exploits still get you banned</li>
+                        <li>Type <b>!aguide</b> in chat if you're staff</li>
+                        <li>Questions? Ask in Discord</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2><span class="ic">🔗</span>JOIN DISCORD</h2>
+        <p>News, updates and support.</p>
+        <div class="copyrow">
+            <div class="box" id="discordBox">discord.gg/7Y4a4nc5Ym</div>
+            <div class="btn"><button onclick="copyText('discordBox', this)">COPY</button></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2><span class="ic">⌨</span>CONTROLS &amp; KEYBINDS</h2>
+        <div class="two">
+            <div class="col" style="padding-right:7px;">
+                <div class="grid">
+                    <div class="grow"><div class="key"><span>G</span></div><div class="desc">Lie down / get up</div></div>
+                    <div class="grow"><div class="key"><span>V</span></div><div class="desc">Kick - opens doors, staggers people, breaks barricades</div></div>
+                    <div class="grow"><div class="key"><span>SHIFT</span></div><div class="desc">Sprint (costs stamina)</div></div>
+                    <div class="grow"><div class="key"><span>ALT</span></div><div class="desc">Walk quietly</div></div>
+                    <div class="grow"><div class="key"><span>TAB</span></div><div class="desc">Scoreboard, and the keybind menu</div></div>
+                </div>
+            </div>
+            <div class="col" style="padding-left:7px;">
+                <div class="grid">
+                    <div class="grow"><div class="key"><span>LMB</span></div><div class="desc">Swing / fire</div></div>
+                    <div class="grow"><div class="key"><span>RMB</span></div><div class="desc">Block (melee) / aim down sights (guns)</div></div>
+                    <div class="grow"><div class="key"><span>R</span></div><div class="desc">Reload</div></div>
+                    <div class="grow"><div class="key"><span>K</span></div><div class="desc">Give up while unconscious (press twice)</div></div>
+                    <div class="grow"><div class="key"><span>!guide</span></div><div class="desc">Full guide - injuries, every special round</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2><span class="ic">🎮</span>CONNECT TO THE SERVER</h2>
+        <div class="copyrow">
+            <div class="box" id="connectBox">connect 94.250.213.61:27015</div>
+            <div class="btn"><button onclick="copyText('connectBox', this)">COPY</button></div>
+        </div>
+        <p style="margin-top:10px;">Paste that into your GMod console (~), or add <b>94.250.213.61:27015</b> under Find Multiplayer Game &rarr; Favorites.<br>First visit downloads about 13&nbsp;GB - it only happens once.</p>
+    </div>
+
+    <div class="card">
+        <h2><span class="ic">🧭</span>RESOURCES</h2>
+        <div class="links">
+            <a href="https://discord.gg/7Y4a4nc5Ym" target="_blank"><span class="l1">💬</span>Discord</a>
+            <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3796218262" target="_blank"><span class="l1">📦</span>Workshop Collection</a>
+        </div>
+    </div>
+
+    <div id="foot">Type <b style="color:#ffd14a;">!guide</b> any time in chat to see this again.</div>
+</div>
+
+<script>
+function copyText(boxId, btn) {
+    var box = document.getElementById(boxId);
+    var text = box.textContent || box.innerText;
+
+    // Textarea + execCommand is the reliable path inside GMod's embedded
+    // browser (navigator.clipboard needs a secure context/permissions that
+    // panel doesn't grant).
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    document.body.removeChild(ta);
+
+    if (!ok && window.gmod_copyToClipboard) {
+        try { window.gmod_copyToClipboard(text); ok = true; } catch (e2) {}
+    }
+
+    var original = btn.textContent;
+    btn.textContent = ok ? "COPIED" : "PRESS CTRL+C";
+    btn.className = ok ? "done" : "";
+    setTimeout(function () { btn.textContent = original; btn.className = ""; }, 1600);
+}
+
+// deterministic skyline, same generator as the loading screen
+(function () {
+    var svg = document.getElementById("sky");
+    var NS = "http://www.w3.org/2000/svg", seed = 1337;
+    function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+    function add(attrs) {
+        var n = document.createElementNS(NS, "rect");
+        for (var k in attrs) { n.setAttribute(k, attrs[k]); }
+        svg.appendChild(n);
+    }
+    function layer(color, minH, maxH, minW, maxW, windows) {
+        var x = -10;
+        while (x < 920) {
+            var w = minW + rnd() * (maxW - minW);
+            var h = minH + rnd() * (maxH - minH);
+            var y = 160 - h;
+            add({ x: x, y: y, width: w + 1, height: h, fill: color });
+            if (windows) {
+                for (var wy = y + 7; wy < 154; wy += 12) {
+                    for (var wx = x + 4; wx < x + w - 5; wx += 9) {
+                        if (rnd() < 0.16) {
+                            add({ x: wx, y: wy, width: 3.5, height: 5,
+                                fill: rnd() < 0.8 ? "#ffd14a" : "#9fb4d8", opacity: (0.3 + rnd() * 0.5).toFixed(2) });
+                        }
+                    }
+                }
+            }
+            x += w + (rnd() < 0.3 ? 4 + rnd() * 14 : 0);
+        }
+    }
+    layer("#1f1e26", 55, 100, 34, 85, false);
+    layer("#121217", 30, 78, 40, 95, true);
+})();
+</script>
+</body>
+</html>
