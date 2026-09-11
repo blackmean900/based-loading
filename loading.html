@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Based Z-City</title>
+<!--
+    Based Z-City - loading screen
+    ---------------------------------------------------------------------------
+    Shown by Garry's Mod while a player connects (server convar sv_loadingurl).
+    GMod calls the functions at the bottom (GameDetails, SetFilesTotal, ...)
+    with the map, download progress and status.
+
+    Written for GMod's OLD built-in browser as well as the new one: no CSS
+    variables, flexbox or grid, ES5 JavaScript only, -webkit- prefixes kept.
+    Everything is drawn here - no external images or fonts to fail to load.
+
+    loading.html           live loading screen (point sv_loadingurl at this)
+    loading.html?static    same design without the live panel (used to make the PNG)
+-->
+<style>
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b0b0e; }
+body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: #e4e4ea; font-size: 16px; }
+
+#bg {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    background: #0b0b0e;
+    background-image: -webkit-radial-gradient(50% 34%, circle cover, #26242a 0%, #141419 42%, #08080a 100%);
+    background-image: radial-gradient(circle at 50% 34%, #26242a 0%, #141419 42%, #08080a 100%);
+}
+
+#rain {
+    position: absolute; left: -10%; top: -10%; width: 120%; height: 120%;
+    opacity: 0.55;
+    background-image: -webkit-repeating-linear-gradient(105deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 17px);
+    background-image: repeating-linear-gradient(105deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 17px);
+    -webkit-animation: rain 0.9s linear infinite;
+    animation: rain 0.9s linear infinite;
+}
+@-webkit-keyframes rain { from { background-position: 0 0; } to { background-position: -40px 150px; } }
+@keyframes rain { from { background-position: 0 0; } to { background-position: -40px 150px; } }
+
+/* the city sits ON the info panel (bottom offset = panel height), not behind it */
+#skyline { position: absolute; left: 0; bottom: 15.5em; width: 100%; height: 36%; }
+#glow {
+    position: absolute; left: 0; right: 0; bottom: 15.5em; height: 42%;
+    background-image: -webkit-linear-gradient(bottom, rgba(255,176,48,0.16) 0%, rgba(214,90,90,0.07) 35%, rgba(0,0,0,0) 100%);
+    background-image: linear-gradient(to top, rgba(255,176,48,0.16) 0%, rgba(214,90,90,0.07) 35%, rgba(0,0,0,0) 100%);
+}
+
+#vignette {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    background-image: -webkit-radial-gradient(50% 45%, circle cover, rgba(0,0,0,0) 45%, rgba(0,0,0,0.78) 100%);
+    background-image: radial-gradient(circle at 50% 45%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.78) 100%);
+}
+
+/* ---- title ---- */
+#title { position: absolute; left: 0; right: 0; top: 13%; text-align: center; }
+#welcome { font-size: 1.15em; letter-spacing: 0.7em; color: #9a9aa6; margin-left: 0.7em; }
+#based {
+    font-family: Impact, "Arial Black", "Franklin Gothic Heavy", sans-serif;
+    font-size: 11.5em; line-height: 1; letter-spacing: 0.06em; margin: 0.08em 0 0 0.06em;
+    color: #ffd14a;
+    text-shadow: 0 0 0.35em rgba(255, 190, 40, 0.35), 0 0.04em 0 #a8791a, 0 0.09em 0.12em rgba(0,0,0,0.8);
+}
+#zcity {
+    font-family: Impact, "Arial Black", sans-serif;
+    font-size: 3.6em; letter-spacing: 0.55em; margin-left: 0.55em; color: #f2f2f6;
+    text-shadow: 0 0.08em 0.2em rgba(0,0,0,0.9);
+}
+#rule { width: 34em; height: 0.18em; margin: 1.1em auto 0.9em auto; background: #d65a5a;
+    background-image: -webkit-linear-gradient(left, rgba(214,90,90,0), #d65a5a 20%, #ffd14a 50%, #d65a5a 80%, rgba(214,90,90,0));
+    background-image: linear-gradient(to right, rgba(214,90,90,0), #d65a5a 20%, #ffd14a 50%, #d65a5a 80%, rgba(214,90,90,0)); }
+#tagline { font-size: 1.35em; letter-spacing: 0.4em; margin-left: 0.4em; color: #c9c9d2; }
+#tagline b { color: #e0605f; font-weight: 700; }
+
+/* ---- bottom panel ---- */
+#panel {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 15.5em;
+    background: rgba(9, 9, 12, 0.96);
+    border-top: 0.14em solid #ffd14a;
+}
+#left { position: absolute; left: 4em; top: 2em; width: 52em; }
+#right { position: absolute; right: 4em; top: 2em; width: 46em; }
+
+.label { font-size: 0.85em; letter-spacing: 0.35em; color: #7d7d88; font-weight: 700; }
+.value { font-size: 1.45em; color: #f0f0f5; margin: 0.15em 0 0.8em 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.col { display: inline-block; vertical-align: top; margin-right: 3.5em; }
+
+#status { font-size: 1.05em; color: #c9c9d2; margin-top: 0.2em; height: 1.5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#barwrap { position: relative; height: 0.7em; margin-top: 0.7em; background: rgba(255,255,255,0.08); border-radius: 0.35em; overflow: hidden; }
+#bar { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: #ffd14a; border-radius: 0.35em;
+    -webkit-transition: width 0.4s ease; transition: width 0.4s ease; }
+#files { font-size: 0.95em; color: #8d8d98; margin-top: 0.55em; }
+
+#tipbox { border-left: 0.2em solid #d65a5a; padding: 0.2em 0 0.2em 1.2em; height: 5.6em; }
+#tip { font-size: 1.4em; line-height: 1.45; color: #e4e4ea; margin-top: 0.3em;
+    -webkit-transition: opacity 0.5s ease; transition: opacity 0.5s ease; }
+#foot { font-size: 1em; color: #9a9aa6; margin-top: 1.2em; }
+#foot b { color: #ffd14a; font-weight: 600; }
+
+/* static mode: no live panel content, just the art and the community line */
+body.static #left, body.static #tipbox { display: none; }
+body.static #right { left: 0; right: 0; width: auto; text-align: center; top: 4.4em; }
+body.static #panel { height: 11em; }
+body.static #skyline, body.static #glow { bottom: 11em; }
+body.static #skyline { height: 40%; }
+body.static #foot { font-size: 1.5em; margin-top: 0; }
+body.static #title { top: 11%; }
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<div id="rain"></div>
+<div id="glow"></div>
+<svg id="skyline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 500" preserveAspectRatio="xMidYMax slice"></svg>
+<div id="vignette"></div>
+
+<div id="title">
+    <div id="welcome">WELCOME TO</div>
+    <div id="based">BASED</div>
+    <div id="zcity">Z-CITY</div>
+    <div id="rule"></div>
+    <div id="tagline"><b>HOMICIDE</b> &nbsp;+&nbsp; CUSTOM MODES</div>
+</div>
+
+<div id="panel">
+    <div id="left">
+        <div class="col"><div class="label">MAP</div><div class="value" id="map">...</div></div>
+        <div class="col"><div class="label">SLOTS</div><div class="value" id="players">...</div></div>
+        <div class="label">LOADING</div>
+        <div id="status">Connecting to the city...</div>
+        <div id="barwrap"><div id="bar"></div></div>
+        <div id="files">First visit downloads about 13 GB of content - it only happens once.</div>
+    </div>
+    <div id="right">
+        <div id="tipbox">
+            <div class="label">TIP</div>
+            <div id="tip">&nbsp;</div>
+        </div>
+        <div id="foot">Type <b>!guide</b> in chat &nbsp;&middot;&nbsp; Discord <b>discord.gg/7Y4a4nc5Ym</b></div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var isStatic = window.location.search.indexOf("static") !== -1;
+    if (isStatic) { document.body.className = "static"; }
+
+    // Scale everything (em units) to the window, designed at 1920x1080.
+    function fit() {
+        var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+        document.body.style.fontSize = (16 * s) + "px";
+    }
+    fit();
+    window.onresize = fit;
+
+    function el(id) { return document.getElementById(id); }
+    function setText(id, t) { var e = el(id); if (e) { e.innerHTML = ""; e.appendChild(document.createTextNode(t)); } }
+
+    // ---- skyline: deterministic pseudo-random buildings + lit windows ----
+    var NS = "http://www.w3.org/2000/svg";
+    var svg = el("skyline");
+    var seed = 1337;
+    function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+    function add(tag, attrs) {
+        var n = document.createElementNS(NS, tag);
+        for (var k in attrs) { if (attrs.hasOwnProperty(k)) { n.setAttribute(k, attrs[k]); } }
+        svg.appendChild(n);
+        return n;
+    }
+    function layer(color, minH, maxH, minW, maxW, windows) {
+        var x = -20;
+        while (x < 1940) {
+            var w = minW + rnd() * (maxW - minW);
+            var h = minH + rnd() * (maxH - minH);
+            var y = 500 - h;
+            add("rect", { x: x.toFixed(1), y: y.toFixed(1), width: (w + 1).toFixed(1), height: h.toFixed(1), fill: color });
+            if (rnd() < 0.25) {   // rooftop antenna / water tank
+                add("rect", { x: (x + w * 0.3).toFixed(1), y: (y - 18).toFixed(1), width: "3", height: "18", fill: color });
+            }
+            if (windows) {
+                for (var wy = y + 14; wy < 490; wy += 22) {
+                    for (var wx = x + 9; wx < x + w - 10; wx += 17) {
+                        if (rnd() < 0.2) {
+                            var warm = rnd() < 0.8;
+                            add("rect", { x: wx.toFixed(1), y: wy.toFixed(1), width: "7", height: "10",
+                                fill: warm ? "#ffd14a" : "#9fb4d8", opacity: (0.35 + rnd() * 0.55).toFixed(2) });
+                        }
+                    }
+                }
+            }
+            x += w + (rnd() < 0.3 ? 6 + rnd() * 20 : 0);
+        }
+    }
+    layer("#1f1e26", 200, 380, 60, 150, false);   // far, lit by the glow behind
+    layer("#121217", 120, 300, 70, 170, true);    // near, with windows
+    add("rect", { x: "0", y: "488", width: "1920", height: "12", fill: "#09090c" });
+
+    // ---- tips ----
+    var tips = [
+        "Bleeding out? Bandage first, then the bloodbag.",
+        "Painkillers hide the pain, not the wound - you can still bleed out feeling fine.",
+        "Knocked out isn't dead. A teammate can still bring you back.",
+        "Arm wounds wreck your aim. Leg wounds slow you down.",
+        "Run out of stamina mid-fight and you can't block or swing properly. Pace yourself.",
+        "At the end of a round everyone votes on what comes next. SPECIAL opens a second vote.",
+        "Killing teammates costs karma. Hit zero and you're banned for a while.",
+        "Every special round has its own abilities. Type !guide in chat to read them all.",
+        "An arterial bleed needs a tourniquet - and it needs it fast."
+    ];
+    var tipIndex = Math.floor(Math.random() * tips.length);
+    function nextTip() {
+        var t = el("tip");
+        t.style.opacity = "0";
+        setTimeout(function () {
+            tipIndex = (tipIndex + 1) % tips.length;
+            setText("tip", tips[tipIndex]);
+            t.style.opacity = "1";
+        }, 500);
+    }
+    setText("tip", tips[tipIndex]);
+    if (!isStatic) { setInterval(nextTip, 7000); }
+
+    // ---- GMod loading screen API ----
+    var total = 0, needed = 0;
+
+    function updateBar() {
+        if (total <= 0) { return; }
+        var done = Math.max(total - needed, 0);
+        var pct = Math.max(0, Math.min(100, Math.round(done / total * 100)));
+        el("bar").style.width = pct + "%";
+        setText("files", "Files " + done + " / " + total + "  (" + pct + "%)  -  first visit downloads about 13 GB, only once.");
+    }
+
+    window.GameDetails = function (servername, serverurl, mapname, maxplayers, steamid, gamemode) {
+        if (mapname) { setText("map", mapname); }
+        if (maxplayers) { setText("players", maxplayers + " players"); }
+    };
+    window.SetFilesTotal = function (t) { total = t; updateBar(); };
+    window.SetFilesNeeded = function (n) { needed = n; updateBar(); };
+    window.DownloadingFile = function (fileName) {
+        var f = String(fileName || "");
+        if (f.length > 70) { f = "..." + f.substr(f.length - 67); }
+        setText("status", "Downloading " + f);
+    };
+    window.SetStatusChanged = function (status) {
+        if (status) { setText("status", status); }
+        if (/sending client info/i.test(status || "")) { el("bar").style.width = "100%"; }
+    };
+})();
+</script>
+</body>
+</html>
