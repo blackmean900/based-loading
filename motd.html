@@ -57,7 +57,7 @@ svg#drips { position: absolute; left: 0; top: 0; width: 100%; height: 100%; over
 
 .card { position: relative; background: rgba(18,10,11,0.94); border: 1px solid rgba(255,255,255,0.07); border-top: 2px solid #b3121a;
     border-radius: 8px; padding: 20px 22px; margin-top: 22px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
-.card .drip { position: absolute; left: 0; top: -1px; width: 100%; height: 14px; overflow: visible; }
+.card .drip { position: absolute; left: 0; top: -1px; width: 100%; height: 60px; overflow: visible; pointer-events: none; z-index: 0; opacity: 0.85; }
 .card h2 { margin: 0 0 12px 0; font-size: 14px; letter-spacing: 0.2em; color: #ff4a3d; font-weight: 700; text-transform: uppercase; }
 .card h2 .n { color: #6f5a5a; margin-right: 10px; font-family: Consolas, monospace; }
 .card p { margin: 0 0 10px 0; color: #d2c6c6; line-height: 1.55; }
@@ -318,20 +318,43 @@ function copyText(boxId, btn) {
         add(dr, "ellipse", { cx: (x + w / 2).toFixed(1), cy: (82 + len).toFixed(1), rx: (w * 0.75).toFixed(1), ry: (w * 0.2).toFixed(1), fill: "#8f0a10" });
     }
 
-    // a few drips hanging off the top edge of every card
+    // drips hanging off the top edge of every card - they creep down, and
+    // every so often a drop breaks off and falls
+    var drips = [];
     var cards = document.getElementsByClassName("card");
     for (var ci = 0; ci < cards.length; ci++) {
         var s = document.createElementNS(NS, "svg");
         s.setAttribute("class", "drip");
-        s.setAttribute("viewBox", "0 0 860 14");
+        s.setAttribute("viewBox", "0 0 860 60");
         s.setAttribute("preserveAspectRatio", "none");
-        cards[ci].appendChild(s);
+        s.style.position = "absolute"; s.style.left = "0"; s.style.top = "-1px"; s.style.width = "100%"; s.style.height = "60px";
+        s.style.pointerEvents = "none"; s.style.opacity = "0.85";
+        cards[ci].insertBefore(s, cards[ci].firstChild);
         for (var di = 0; di < 7; di++) {
-            var dx = rnd() * 840, dw = 3 + rnd() * 4, dl = 3 + rnd() * 9;
-            add(s, "rect", { x: dx.toFixed(1), y: "0", width: dw.toFixed(1), height: dl.toFixed(1), fill: "#b3121a" });
-            add(s, "circle", { cx: (dx + dw / 2).toFixed(1), cy: dl.toFixed(1), r: (dw * 0.7).toFixed(1), fill: "#b3121a" });
+            var dx = rnd() * 840, dw = 3 + rnd() * 4;
+            drips.push({
+                len: 2 + rnd() * 8, max: 8 + rnd() * 10, speed: 0.6 + rnd() * 2.2, dropY: -1, dropV: 0,
+                body: add(s, "rect", { x: dx.toFixed(1), y: "0", width: dw.toFixed(1), height: "1", fill: "#b3121a" }),
+                tip: add(s, "circle", { cx: (dx + dw / 2).toFixed(1), cy: "1", r: (dw * 0.7).toFixed(1), fill: "#b3121a" }),
+                drop: add(s, "ellipse", { cx: (dx + dw / 2).toFixed(1), cy: "-20", visibility: "hidden", rx: (dw * 0.55).toFixed(1), ry: (dw * 0.85).toFixed(1), fill: "#b3121a" })
+            });
         }
     }
+    setInterval(function () {
+        var dt = 0.033;
+        for (var i = 0; i < drips.length; i++) {
+            var d = drips[i];
+            d.len += d.speed * dt;
+            if (d.len >= d.max) { d.dropY = d.len; d.dropV = 20; d.drop.setAttribute("visibility", "visible"); d.len = d.max * (0.4 + rnd() * 0.2); }
+            d.body.setAttribute("height", d.len.toFixed(1));
+            d.tip.setAttribute("cy", d.len.toFixed(1));
+            if (d.dropY >= 0) {
+                d.dropV += 400 * dt; d.dropY += d.dropV * dt;
+                if (d.dropY > 58) { d.dropY = -1; d.drop.setAttribute("visibility", "hidden"); }
+                else { d.drop.setAttribute("cy", d.dropY.toFixed(1)); }
+            }
+        }
+    }, 33);
 })();
 </script>
 </body>

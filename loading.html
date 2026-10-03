@@ -104,9 +104,9 @@ body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: #e8e2e2; font-
     background: rgba(10, 5, 6, 0.96);
     border-top: 0.16em solid #b3121a;
 }
-#paneldrips { position: absolute; left: 0; top: 0; width: 100%; height: 3em; }
-#left { position: absolute; left: 4em; top: 2em; width: 52em; }
-#right { position: absolute; right: 4em; top: 2em; width: 46em; }
+#paneldrips { position: absolute; left: 0; top: 0; width: 100%; height: 12.5em; pointer-events: none; z-index: 0; opacity: 0.85; }
+#left { position: absolute; left: 4em; top: 2em; width: 52em; z-index: 2; }
+#right { position: absolute; right: 4em; top: 2em; width: 46em; z-index: 2; }
 
 .label { font-size: 0.85em; letter-spacing: 0.35em; color: #8a7272; font-weight: 700; }
 .value { font-size: 1.45em; color: #f5efef; margin: 0.15em 0 0.8em 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -162,7 +162,7 @@ body.static #title { top: 11%; }
 <svg id="holes" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice"></svg>
 
 <div id="panel">
-    <svg id="paneldrips" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 48" preserveAspectRatio="none"></svg>
+    <svg id="paneldrips" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 200" preserveAspectRatio="none"></svg>
     <div id="left">
         <div class="col"><div class="label">MAP</div><div class="value" id="map">...</div></div>
         <div class="col"><div class="label">SLOTS</div><div class="value" id="players">...</div></div>
@@ -242,15 +242,47 @@ body.static #title { top: 11%; }
         add(dr, "ellipse", { cx: (x + w / 2).toFixed(1), cy: (base - 6 + len2).toFixed(1), rx: (w * 0.75).toFixed(1), ry: (w * 0.2).toFixed(1), fill: "#8f0a10" });
     }
 
-    // ---- drips hanging from the panel's top edge ----
+    // ---- drips hanging from the panel's top edge, animated ----
+    // Each drip creeps longer; the further the download, the longer they
+    // get. When one gets heavy, a drop breaks off and falls. Plain
+    // setInterval + attribute updates so GMod's old browser can run it.
+    window.ZCLoadFrac = 0;
     var pd = el("paneldrips");
+    var drips = [];
     for (var k3 = 0; k3 < 40; k3++) {
         var px = rnd() * 1920;
         var pw = 4 + rnd() * 9;
-        var pl = 6 + rnd() * 30;
-        add(pd, "rect", { x: px.toFixed(1), y: "0", width: pw.toFixed(1), height: pl.toFixed(1), rx: (pw / 2).toFixed(1), fill: "#7a0a0f" });
-        add(pd, "circle", { cx: (px + pw / 2).toFixed(1), cy: pl.toFixed(1), r: (pw * 0.7).toFixed(1), fill: "#7a0a0f" });
+        var d = {
+            x: px, w: pw, len: 4 + rnd() * 14, speed: 1.5 + rnd() * 5, maxBase: 12 + rnd() * 20,
+            body: add(pd, "rect", { x: px.toFixed(1), y: "0", width: pw.toFixed(1), height: "1", rx: (pw / 2).toFixed(1), fill: "#7a0a0f" }),
+            tip: add(pd, "circle", { cx: (px + pw / 2).toFixed(1), cy: "1", r: (pw * 0.7).toFixed(1), fill: "#7a0a0f" }),
+            drop: add(pd, "ellipse", { cx: (px + pw / 2).toFixed(1), cy: "-50", visibility: "hidden", rx: (pw * 0.55).toFixed(1), ry: (pw * 0.85).toFixed(1), fill: "#8f0a10" }),
+            dropY: -1, dropV: 0
+        };
+        drips.push(d);
     }
+    function stepDrips(dt) {
+        var frac = isStatic ? 0.3 : window.ZCLoadFrac;
+        for (var i = 0; i < drips.length; i++) {
+            var d = drips[i];
+            var max = d.maxBase + frac * 34;
+            d.len += d.speed * dt * (0.4 + frac);
+            if (d.len >= max) {
+                d.dropY = d.len; d.dropV = 40; d.drop.setAttribute("visibility", "visible");   // a drop breaks off
+                d.len = max * (0.45 + rnd() * 0.2);
+            }
+            d.body.setAttribute("height", d.len.toFixed(1));
+            d.tip.setAttribute("cy", d.len.toFixed(1));
+            if (d.dropY >= 0) {
+                d.dropV += 900 * dt;
+                d.dropY += d.dropV * dt;
+                if (d.dropY > 200) { d.dropY = -1; d.drop.setAttribute("visibility", "hidden"); }
+                else { d.drop.setAttribute("cy", d.dropY.toFixed(1)); }
+            }
+        }
+    }
+    stepDrips(isStatic ? 6 : 0);
+    if (!isStatic) { setInterval(function () { stepDrips(0.033); }, 33); }
 
     // ---- bullet holes in the "glass" ----
     var hs = el("holes");
@@ -332,6 +364,7 @@ body.static #title { top: 11%; }
         if (total <= 0) { return; }
         var done = Math.max(total - needed, 0);
         var pct = Math.max(0, Math.min(100, Math.round(done / total * 100)));
+        window.ZCLoadFrac = pct / 100;
         el("bar").style.width = pct + "%";
         setText("files", "Files " + done + " / " + total + "  (" + pct + "%)  -  first visit downloads about 13 GB, only once.");
     }
@@ -348,8 +381,15 @@ body.static #title { top: 11%; }
     };
     window.SetStatusChanged = function (status) {
         if (status) { setText("status", status); }
-        if (/sending client info/i.test(status || "")) { el("bar").style.width = "100%"; }
+        if (/sending client info/i.test(status || "")) { el("bar").style.width = "100%"; window.ZCLoadFrac = 1; }
     };
+    // ?demo fakes a download so the page can be previewed in a browser
+    if (window.location.search.indexOf("demo") !== -1) {
+        window.GameDetails("", "", "gm_building_v2", 25);
+        window.SetFilesTotal(100);
+        var left = 100;
+        setInterval(function () { left = Math.max(0, left - 4); window.SetFilesNeeded(left); }, 250);
+    }
 })();
 </script>
 </body>
