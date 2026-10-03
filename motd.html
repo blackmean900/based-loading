@@ -4,11 +4,10 @@
 <meta charset="utf-8">
 <title>Based Z-City</title>
 <!--
-    Based Z-City - ULX MOTD
+    Based Z-City - ULX MOTD  (v2, 2026-10-03: crime scene / blood, matches the loading screen)
     ---------------------------------------------------------------------------
     Opens automatically when a player joins (ULX's built-in MOTD system,
-    mode 3 = URL). Same visual language as the loading screen: near-black,
-    gold, a little red, a night city skyline.
+    mode 3 = URL).
 
     No rules section on purpose - the server runs on free speech, no chat
     rules. The one line under Getting Started is about cheating, not speech.
@@ -17,47 +16,63 @@
     works in GMod's older embedded browser.
 -->
 <style>
-html, body { margin: 0; padding: 0; background: #0b0b0e; color: #e4e4ea; font-family: "Segoe UI", Tahoma, Arial, sans-serif; font-size: 15px; }
-body { padding-bottom: 40px; }
+html { background: #0a0607; }
+html, body { margin: 0; padding: 0; color: #e8e2e2; font-family: "Segoe UI", Tahoma, Arial, sans-serif; font-size: 15px; }
+body { padding-bottom: 40px; overflow-x: hidden; position: relative; z-index: 0; }
 
-#bg { position: fixed; left: 0; top: 0; right: 0; height: 340px; z-index: -2;
-    background-image: -webkit-radial-gradient(50% 10%, circle cover, #26242a 0%, #141419 45%, #08080a 100%);
-    background-image: radial-gradient(circle at 50% 10%, #26242a 0%, #141419 45%, #08080a 100%); }
-#rain { position: fixed; left: -10%; top: 0; width: 120%; height: 340px; z-index: -1; opacity: 0.5;
-    background-image: -webkit-repeating-linear-gradient(105deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 17px);
-    background-image: repeating-linear-gradient(105deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 17px); }
-svg#sky { position: fixed; left: 0; top: 140px; width: 100%; height: 200px; z-index: -1; }
+#bg { position: fixed; left: 0; top: 0; right: 0; height: 380px; z-index: -3;
+    background-image: -webkit-radial-gradient(50% 12%, circle cover, #2e1414 0%, #170b0c 45%, #060404 100%);
+    background-image: radial-gradient(circle at 50% 12%, #2e1414 0%, #170b0c 45%, #060404 100%); }
+#rain { position: fixed; left: -10%; top: 0; width: 120%; height: 380px; z-index: -2; opacity: 0.5;
+    background-image: -webkit-repeating-linear-gradient(105deg, rgba(255,220,220,0.05) 0px, rgba(255,220,220,0.05) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 17px);
+    background-image: repeating-linear-gradient(105deg, rgba(255,220,220,0.05) 0px, rgba(255,220,220,0.05) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 17px); }
+svg#splat { position: fixed; left: 0; top: 0; width: 100%; height: 380px; z-index: -2; }
+svg#sky { position: fixed; left: 0; top: 180px; width: 100%; height: 200px; z-index: -1; }
+#siren { position: fixed; left: 0; right: 0; top: 0; height: 380px; z-index: -1; opacity: 0.6;
+    background-image: -webkit-radial-gradient(20% 100%, 520px 260px, rgba(255,30,30,0.35) 0%, rgba(0,0,0,0) 100%);
+    background-image: radial-gradient(520px 260px at 20% 100%, rgba(255,30,30,0.35) 0%, rgba(0,0,0,0) 100%);
+    -webkit-animation: siren 1.4s steps(1) infinite; animation: siren 1.4s steps(1) infinite; }
+@-webkit-keyframes siren { 0% { opacity: 0.7; } 50% { opacity: 0.1; } }
+@keyframes siren { 0% { opacity: 0.7; } 50% { opacity: 0.1; } }
 
-.wrap { max-width: 860px; margin: 0 auto; padding: 0 22px; position: relative; }
+.tape { position: absolute; height: 34px; line-height: 34px; white-space: nowrap; overflow: hidden; background: #f2c400; color: #111;
+    font-family: Impact, "Arial Black", sans-serif; font-size: 17px; letter-spacing: 0.22em; box-shadow: 0 4px 12px rgba(0,0,0,0.7); z-index: 0; }
+#tape1 { left: -60px; top: 22px; width: 560px; -webkit-transform: rotate(-8deg); transform: rotate(-8deg); }
+#tape2 { right: -70px; top: 44px; width: 520px; -webkit-transform: rotate(7deg); transform: rotate(7deg); }
 
-#header { text-align: center; padding-top: 46px; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 22px; position: relative; z-index: 1; }
+
+#header { text-align: center; padding-top: 70px; }
 .impact { font-family: Impact, "Arial Black", "Franklin Gothic Heavy", sans-serif; }
-.gold { color: #ffd14a; text-shadow: 0 0 0.35em rgba(255,190,40,0.35), 0 0.04em 0 #a8791a, 0 0.09em 0.12em rgba(0,0,0,0.8); }
-#header .based { font-size: 74px; line-height: 1; letter-spacing: 0.05em; margin-left: 0.05em; }
-#header .zc { font-size: 26px; letter-spacing: 0.5em; margin-left: 0.5em; color: #f2f2f6; margin-top: 4px; text-shadow: 0 2px 8px rgba(0,0,0,0.9); }
+#basedwrap { position: relative; display: inline-block; }
+#based { font-size: 80px; line-height: 1; letter-spacing: 0.05em; margin-left: 0.05em; color: #ffd14a;
+    text-shadow: 0 0 0.3em rgba(255,60,30,0.35), 0 0.04em 0 #a8791a, 0 0.09em 0.12em rgba(0,0,0,0.85); }
+svg#drips { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+#header .zc { position: relative; font-size: 26px; letter-spacing: 0.5em; margin-left: 0.5em; color: #f2eded; margin-top: 6px; text-shadow: 0 2px 8px rgba(0,0,0,0.9); }
 #header .rule { width: 320px; height: 3px; margin: 14px auto 10px auto;
-    background-image: -webkit-linear-gradient(left, rgba(214,90,90,0), #d65a5a 20%, #ffd14a 50%, #d65a5a 80%, rgba(214,90,90,0));
-    background-image: linear-gradient(to right, rgba(214,90,90,0), #d65a5a 20%, #ffd14a 50%, #d65a5a 80%, rgba(214,90,90,0)); }
-#header .tag { font-size: 13px; letter-spacing: 0.3em; margin-left: 0.3em; color: #c9c9d2; }
-#header .tag b { color: #e0605f; }
+    background-image: -webkit-linear-gradient(left, rgba(179,18,26,0), #b3121a 20%, #ff3b30 50%, #b3121a 80%, rgba(179,18,26,0));
+    background-image: linear-gradient(to right, rgba(179,18,26,0), #b3121a 20%, #ff3b30 50%, #b3121a 80%, rgba(179,18,26,0)); }
+#header .tag { font-size: 13px; letter-spacing: 0.3em; margin-left: 0.3em; color: #d2c6c6; }
+#header .tag b { color: #ff3b30; }
 
-.card { background: rgba(20,20,25,0.92); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
-    padding: 20px 22px; margin-top: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
-.card h2 { margin: 0 0 12px 0; font-size: 14px; letter-spacing: 0.18em; color: #ffd14a; font-weight: 700;
-    text-transform: uppercase; }
-.card h2 .ic { margin-right: 8px; }
-.card p { margin: 0 0 10px 0; color: #c9c9d2; line-height: 1.55; }
+.card { position: relative; background: rgba(18,10,11,0.94); border: 1px solid rgba(255,255,255,0.07); border-top: 2px solid #b3121a;
+    border-radius: 8px; padding: 20px 22px; margin-top: 22px; box-shadow: 0 8px 24px rgba(0,0,0,0.45); }
+.card .drip { position: absolute; left: 0; top: -1px; width: 100%; height: 14px; overflow: visible; }
+.card h2 { margin: 0 0 12px 0; font-size: 14px; letter-spacing: 0.2em; color: #ff4a3d; font-weight: 700; text-transform: uppercase; }
+.card h2 .n { color: #6f5a5a; margin-right: 10px; font-family: Consolas, monospace; }
+.card p { margin: 0 0 10px 0; color: #d2c6c6; line-height: 1.55; }
 .card p:last-child { margin-bottom: 0; }
-.card ul { margin: 0; padding-left: 20px; color: #d6d6de; line-height: 1.7; }
+.card ul { margin: 0; padding-left: 20px; color: #ddd4d4; line-height: 1.7; }
+.card b { color: #fff; }
 .two { display: table; width: 100%; border-spacing: 14px 0; margin-left: -14px; width: calc(100% + 14px); }
 .two .col { display: table-cell; width: 50%; vertical-align: top; }
-.mini { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 14px 16px; }
-.mini h3 { margin: 0 0 8px 0; font-size: 12px; letter-spacing: 0.1em; color: #f2f2f6; text-transform: uppercase; }
+.mini { background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 14px 16px; }
+.mini h3 { margin: 0 0 8px 0; font-size: 12px; letter-spacing: 0.1em; color: #f2eded; text-transform: uppercase; }
 
 .copyrow { display: table; width: 100%; margin-top: 8px; }
-.copyrow .box { display: table-cell; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1);
+.copyrow .box { display: table-cell; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
     border-radius: 6px 0 0 6px; padding: 10px 12px; font-family: Consolas, "Courier New", monospace; font-size: 13px;
-    color: #e4e4ea; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    color: #ebe4e4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .copyrow .btn { display: table-cell; width: 1px; white-space: nowrap; }
 .copyrow .btn button { height: 100%; padding: 0 16px; border: 1px solid #ffd14a; border-left: none; border-radius: 0 6px 6px 0;
     background: #ffd14a; color: #1a1408; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; cursor: pointer; }
@@ -70,32 +85,38 @@ svg#sky { position: fixed; left: 0; top: 140px; width: 100%; height: 200px; z-in
 .key span { display: inline-block; min-width: 44px; text-align: center; background: rgba(255,209,74,0.12);
     border: 1px solid rgba(255,209,74,0.4); border-radius: 4px; padding: 3px 8px; font-family: Consolas, monospace;
     font-size: 12px; font-weight: 700; color: #ffd14a; }
-.desc { display: table-cell; vertical-align: top; padding-top: 4px; color: #d6d6de; }
+.desc { display: table-cell; vertical-align: top; padding-top: 4px; color: #ddd4d4; }
 
 .links { display: table; width: 100%; border-spacing: 10px 0; margin-left: -10px; width: calc(100% + 10px); }
-.links a { display: table-cell; text-align: center; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px; padding: 14px 8px; color: #f2f2f6; text-decoration: none; font-size: 13px; font-weight: 600; }
-.links a:hover { background: rgba(255,209,74,0.08); border-color: rgba(255,209,74,0.35); }
-.links a .l1 { display: block; font-size: 20px; margin-bottom: 4px; }
+.links a { display: table-cell; text-align: center; background: rgba(255,255,255,0.035); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px; padding: 14px 8px; color: #f2eded; text-decoration: none; font-size: 13px; font-weight: 600; letter-spacing: 0.08em; }
+.links a:hover { background: rgba(255,59,48,0.10); border-color: rgba(255,59,48,0.45); }
 
-#foot { text-align: center; color: #6f6f7a; font-size: 12px; margin-top: 26px; letter-spacing: 0.05em; }
+#foot { text-align: center; color: #7a6a6a; font-size: 12px; margin-top: 26px; letter-spacing: 0.05em; }
 </style>
 </head>
 <body>
 <div id="bg"></div>
 <div id="rain"></div>
+<svg id="splat" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" preserveAspectRatio="xMidYMin slice"></svg>
+<div id="siren"></div>
 <svg id="sky" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 160" preserveAspectRatio="xMidYMax slice"></svg>
+<div class="tape" id="tape1">CRIME SCENE &nbsp;&#9650;&nbsp; DO NOT CROSS &nbsp;&#9650;&nbsp; CRIME SCENE &nbsp;&#9650;&nbsp; DO NOT CROSS</div>
+<div class="tape" id="tape2">DO NOT CROSS &nbsp;&#9650;&nbsp; CRIME SCENE &nbsp;&#9650;&nbsp; DO NOT CROSS &nbsp;&#9650;&nbsp; CRIME SCENE</div>
 
 <div class="wrap">
     <div id="header">
-        <div class="based impact gold">BASED</div>
+        <div id="basedwrap">
+            <div id="based" class="impact">BASED</div>
+            <svg id="drips" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" preserveAspectRatio="none"></svg>
+        </div>
         <div class="zc impact">Z-CITY</div>
         <div class="rule"></div>
         <div class="tag"><b>HOMICIDE</b> &nbsp;+&nbsp; CUSTOM MODES</div>
     </div>
 
     <div class="card">
-        <h2><span class="ic">⚡</span>GETTING STARTED</h2>
+        <h2><span class="n">01</span>Getting started</h2>
         <div class="two">
             <div class="col" style="padding-right:7px;">
                 <div class="mini">
@@ -114,8 +135,8 @@ svg#sky { position: fixed; left: 0; top: 140px; width: 100%; height: 200px; z-in
                     <ul>
                         <li><b>Free speech server</b> - no chat rules, say what you want</li>
                         <li>Cheats, hacks and exploits still get you banned</li>
+                        <li>Every hour played earns a point - spend them with <b>!store</b></li>
                         <li>Type <b>!aguide</b> in chat if you're staff</li>
-                        <li>Questions? Ask in Discord</li>
                     </ul>
                 </div>
             </div>
@@ -123,7 +144,7 @@ svg#sky { position: fixed; left: 0; top: 140px; width: 100%; height: 200px; z-in
     </div>
 
     <div class="card">
-        <h2><span class="ic">🔗</span>JOIN DISCORD</h2>
+        <h2><span class="n">02</span>Join the Discord</h2>
         <p>News, updates and support.</p>
         <div class="copyrow">
             <div class="box" id="discordBox">discord.gg/7Y4a4nc5Ym</div>
@@ -132,7 +153,7 @@ svg#sky { position: fixed; left: 0; top: 140px; width: 100%; height: 200px; z-in
     </div>
 
     <div class="card">
-        <h2><span class="ic">⌨</span>CONTROLS &amp; KEYBINDS</h2>
+        <h2><span class="n">03</span>Controls &amp; keybinds</h2>
         <div class="two">
             <div class="col" style="padding-right:7px;">
                 <div class="grid">
@@ -148,15 +169,15 @@ svg#sky { position: fixed; left: 0; top: 140px; width: 100%; height: 200px; z-in
                     <div class="grow"><div class="key"><span>LMB</span></div><div class="desc">Swing / fire</div></div>
                     <div class="grow"><div class="key"><span>RMB</span></div><div class="desc">Block (melee) / aim down sights (guns)</div></div>
                     <div class="grow"><div class="key"><span>R</span></div><div class="desc">Reload</div></div>
+                    <div class="grow"><div class="key"><span>F2</span></div><div class="desc">Examine a body - weapon, range, time of death</div></div>
                     <div class="grow"><div class="key"><span>K</span></div><div class="desc">Give up while unconscious (press twice)</div></div>
-                    <div class="grow"><div class="key"><span>!guide</span></div><div class="desc">Full guide - injuries, every special round</div></div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="card">
-        <h2><span class="ic">🩸</span>PLAYER GUIDE</h2>
+        <h2><span class="n">04</span>Staying alive</h2>
         <div class="two">
             <div class="col" style="padding-right:7px;">
                 <div class="mini">
@@ -173,10 +194,11 @@ svg#sky { position: fixed; left: 0; top: 140px; width: 100%; height: 200px; z-in
                 <div class="mini">
                     <h3>Special rounds</h3>
                     <ul>
-                        <li><b>The Brute</b> - armoured, two-handed hammer, bare-hand grab/throw</li>
-                        <li><b>Thor</b> - throws his hammer, calls lightning, leaps and slams</li>
-                        <li><b>The Evolution / The Mimic / Jeff / The Vermin</b> - each has its own kit</li>
-                        <li>Every round announces its own rules when it starts - <b>!guide</b> lists them all</li>
+                        <li><b>The Brute</b> - armoured, two-handed hammer, rips limbs off</li>
+                        <li><b>Jeff</b> - x-ray vision, blinks behind you, deadly backstab</li>
+                        <li><b>SCP-173</b> - it only moves when nobody is looking</li>
+                        <li><b>Zombie Outbreak</b> - fight to the extraction point</li>
+                        <li><b>Evolution, Mimic, Vermin, Samurai, Homelander</b> and more - <b>!guide</b> lists them all</li>
                     </ul>
                 </div>
             </div>
@@ -184,7 +206,7 @@ svg#sky { position: fixed; left: 0; top: 140px; width: 100%; height: 200px; z-in
     </div>
 
     <div class="card">
-        <h2><span class="ic">🎮</span>CONNECT TO THE SERVER</h2>
+        <h2><span class="n">05</span>Connect to the server</h2>
         <div class="copyrow">
             <div class="box" id="connectBox">connect 187.124.27.226:27015</div>
             <div class="btn"><button onclick="copyText('connectBox', this)">COPY</button></div>
@@ -193,14 +215,14 @@ svg#sky { position: fixed; left: 0; top: 140px; width: 100%; height: 200px; z-in
     </div>
 
     <div class="card">
-        <h2><span class="ic">🧭</span>RESOURCES</h2>
+        <h2><span class="n">06</span>Resources</h2>
         <div class="links">
-            <a href="https://discord.gg/7Y4a4nc5Ym" target="_blank"><span class="l1">💬</span>Discord</a>
-            <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3796218262" target="_blank"><span class="l1">📦</span>Workshop Collection</a>
+            <a href="https://discord.gg/7Y4a4nc5Ym" target="_blank">DISCORD</a>
+            <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3796218262" target="_blank">WORKSHOP COLLECTION</a>
         </div>
     </div>
 
-    <div id="foot">Type <b style="color:#ffd14a;">!guide</b> any time in chat to see this again.</div>
+    <div id="foot">Type <b style="color:#ffd14a;">!guide</b> any time in chat for the full guide.</div>
 </div>
 
 <script>
@@ -232,29 +254,31 @@ function copyText(boxId, btn) {
     setTimeout(function () { btn.textContent = original; btn.className = ""; }, 1600);
 }
 
-// deterministic skyline, same generator as the loading screen
 (function () {
-    var svg = document.getElementById("sky");
     var NS = "http://www.w3.org/2000/svg", seed = 1337;
     function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
-    function add(attrs) {
-        var n = document.createElementNS(NS, "rect");
-        for (var k in attrs) { n.setAttribute(k, attrs[k]); }
+    function add(svg, tag, attrs) {
+        var n = document.createElementNS(NS, tag);
+        for (var k in attrs) { if (attrs.hasOwnProperty(k)) { n.setAttribute(k, attrs[k]); } }
         svg.appendChild(n);
+        return n;
     }
+
+    // skyline
+    var sky = document.getElementById("sky");
     function layer(color, minH, maxH, minW, maxW, windows) {
         var x = -10;
         while (x < 920) {
             var w = minW + rnd() * (maxW - minW);
             var h = minH + rnd() * (maxH - minH);
             var y = 160 - h;
-            add({ x: x, y: y, width: w + 1, height: h, fill: color });
+            add(sky, "rect", { x: x, y: y, width: w + 1, height: h, fill: color });
             if (windows) {
                 for (var wy = y + 7; wy < 154; wy += 12) {
                     for (var wx = x + 4; wx < x + w - 5; wx += 9) {
-                        if (rnd() < 0.16) {
-                            add({ x: wx, y: wy, width: 3.5, height: 5,
-                                fill: rnd() < 0.8 ? "#ffd14a" : "#9fb4d8", opacity: (0.3 + rnd() * 0.5).toFixed(2) });
+                        if (rnd() < 0.15) {
+                            add(sky, "rect", { x: wx, y: wy, width: 3.5, height: 5,
+                                fill: rnd() < 0.75 ? "#ffcf6a" : "#ff4a3d", opacity: (0.3 + rnd() * 0.5).toFixed(2) });
                         }
                     }
                 }
@@ -262,8 +286,52 @@ function copyText(boxId, btn) {
             x += w + (rnd() < 0.3 ? 4 + rnd() * 14 : 0);
         }
     }
-    layer("#1f1e26", 55, 100, 34, 85, false);
-    layer("#121217", 30, 78, 40, 95, true);
+    layer("#241416", 55, 100, 34, 85, false);
+    layer("#120b0c", 30, 78, 40, 95, true);
+
+    // blood splatter
+    var sp = document.getElementById("splat");
+    function splat(cx, cy, size, alpha) {
+        var g = add(sp, "g", { opacity: alpha });
+        for (var c = 0; c < 9; c++) {
+            var ca = rnd() * Math.PI * 2, cd = size * rnd() * 0.45;
+            add(g, "circle", { cx: (cx + Math.cos(ca) * cd).toFixed(1), cy: (cy + Math.sin(ca) * cd).toFixed(1),
+                r: (size * (0.25 + rnd() * 0.35)).toFixed(1), fill: "#6d0a0e" });
+        }
+        for (var i = 0; i < 30; i++) {
+            var a = rnd() * Math.PI * 2, d = size * (0.7 + rnd() * 2.2);
+            var r = Math.max(1.2, size * (0.03 + rnd() * 0.12) * (1.3 - d / (size * 3)));
+            var px = cx + Math.cos(a) * d, py = cy + Math.sin(a) * d;
+            add(g, "ellipse", { cx: px.toFixed(1), cy: py.toFixed(1), rx: (r * (1.6 + rnd())).toFixed(1), ry: r.toFixed(1), fill: "#6d0a0e",
+                transform: "rotate(" + (a * 180 / Math.PI).toFixed(0) + " " + px.toFixed(1) + " " + py.toFixed(1) + ")" });
+        }
+    }
+    splat(330, 170, 46, 0.55);
+    splat(880, 120, 38, 0.5);
+    splat(1050, 260, 26, 0.45);
+
+    // blood running off BASED
+    var dr = document.getElementById("drips");
+    for (var k = 0; k < 11; k++) {
+        var x = 60 + rnd() * 880, w = 6 + rnd() * 8, len = 4 + rnd() * 16;
+        add(dr, "rect", { x: x.toFixed(1), y: "82", width: w.toFixed(1), height: len.toFixed(1), fill: "#8f0a10" });
+        add(dr, "ellipse", { cx: (x + w / 2).toFixed(1), cy: (82 + len).toFixed(1), rx: (w * 0.75).toFixed(1), ry: (w * 0.2).toFixed(1), fill: "#8f0a10" });
+    }
+
+    // a few drips hanging off the top edge of every card
+    var cards = document.getElementsByClassName("card");
+    for (var ci = 0; ci < cards.length; ci++) {
+        var s = document.createElementNS(NS, "svg");
+        s.setAttribute("class", "drip");
+        s.setAttribute("viewBox", "0 0 860 14");
+        s.setAttribute("preserveAspectRatio", "none");
+        cards[ci].appendChild(s);
+        for (var di = 0; di < 7; di++) {
+            var dx = rnd() * 840, dw = 3 + rnd() * 4, dl = 3 + rnd() * 9;
+            add(s, "rect", { x: dx.toFixed(1), y: "0", width: dw.toFixed(1), height: dl.toFixed(1), fill: "#b3121a" });
+            add(s, "circle", { cx: (dx + dw / 2).toFixed(1), cy: dl.toFixed(1), r: (dw * 0.7).toFixed(1), fill: "#b3121a" });
+        }
+    }
 })();
 </script>
 </body>

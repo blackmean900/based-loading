@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>Based Z-City</title>
 <!--
-    Based Z-City - loading screen
+    Based Z-City - loading screen  (v3, 2026-10-03: crime scene / blood)
     ---------------------------------------------------------------------------
     Shown by Garry's Mod while a player connects (server convar sv_loadingurl).
     GMod calls the functions at the bottom (GameDetails, SetFilesTotal, ...)
@@ -18,91 +18,119 @@
     loading.html?static    same design without the live panel (used to make the PNG)
 -->
 <style>
-html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0b0b0e; }
-body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: #e4e4ea; font-size: 16px; }
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0a0607; }
+body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: #e8e2e2; font-size: 16px; }
 
 #bg {
     position: absolute; left: 0; top: 0; right: 0; bottom: 0;
-    background: #0b0b0e;
-    background-image: -webkit-radial-gradient(50% 34%, circle cover, #26242a 0%, #141419 42%, #08080a 100%);
-    background-image: radial-gradient(circle at 50% 34%, #26242a 0%, #141419 42%, #08080a 100%);
+    background: #0a0607;
+    background-image: -webkit-radial-gradient(50% 32%, circle cover, #2e1414 0%, #170b0c 42%, #060404 100%);
+    background-image: radial-gradient(circle at 50% 32%, #2e1414 0%, #170b0c 42%, #060404 100%);
 }
 
 #rain {
     position: absolute; left: -10%; top: -10%; width: 120%; height: 120%;
-    opacity: 0.55;
-    background-image: -webkit-repeating-linear-gradient(105deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 17px);
-    background-image: repeating-linear-gradient(105deg, rgba(255,255,255,0.045) 0px, rgba(255,255,255,0.045) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 17px);
+    opacity: 0.5;
+    background-image: -webkit-repeating-linear-gradient(105deg, rgba(255,220,220,0.05) 0px, rgba(255,220,220,0.05) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 17px);
+    background-image: repeating-linear-gradient(105deg, rgba(255,220,220,0.05) 0px, rgba(255,220,220,0.05) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 17px);
     -webkit-animation: rain 0.9s linear infinite;
     animation: rain 0.9s linear infinite;
 }
 @-webkit-keyframes rain { from { background-position: 0 0; } to { background-position: -40px 150px; } }
 @keyframes rain { from { background-position: 0 0; } to { background-position: -40px 150px; } }
 
-/* the city sits ON the info panel (bottom offset = panel height), not behind it */
+#splatter { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+
 #skyline { position: absolute; left: 0; bottom: 15.5em; width: 100%; height: 36%; }
-#glow {
-    position: absolute; left: 0; right: 0; bottom: 15.5em; height: 42%;
-    background-image: -webkit-linear-gradient(bottom, rgba(255,176,48,0.16) 0%, rgba(214,90,90,0.07) 35%, rgba(0,0,0,0) 100%);
-    background-image: linear-gradient(to top, rgba(255,176,48,0.16) 0%, rgba(214,90,90,0.07) 35%, rgba(0,0,0,0) 100%);
+/* police lights washing over the street, red then blue */
+#sirenRed, #sirenBlue { position: absolute; left: 0; right: 0; bottom: 15.5em; height: 46%; opacity: 0; }
+#sirenRed {
+    background-image: -webkit-radial-gradient(22% 100%, circle cover, rgba(255,30,30,0.42) 0%, rgba(255,30,30,0.08) 38%, rgba(0,0,0,0) 62%);
+    background-image: radial-gradient(circle at 22% 100%, rgba(255,30,30,0.42) 0%, rgba(255,30,30,0.08) 38%, rgba(0,0,0,0) 62%);
+    -webkit-animation: sirenA 1.4s steps(1) infinite; animation: sirenA 1.4s steps(1) infinite;
 }
+#sirenBlue {
+    background-image: -webkit-radial-gradient(78% 100%, circle cover, rgba(40,90,255,0.42) 0%, rgba(40,90,255,0.08) 38%, rgba(0,0,0,0) 62%);
+    background-image: radial-gradient(circle at 78% 100%, rgba(40,90,255,0.42) 0%, rgba(40,90,255,0.08) 38%, rgba(0,0,0,0) 62%);
+    -webkit-animation: sirenB 1.4s steps(1) infinite; animation: sirenB 1.4s steps(1) infinite;
+}
+@-webkit-keyframes sirenA { 0% { opacity: 1; } 25% { opacity: 0.25; } 50% { opacity: 0; } 75% { opacity: 0.4; } }
+@keyframes sirenA { 0% { opacity: 1; } 25% { opacity: 0.25; } 50% { opacity: 0; } 75% { opacity: 0.4; } }
+@-webkit-keyframes sirenB { 0% { opacity: 0; } 25% { opacity: 0.4; } 50% { opacity: 1; } 75% { opacity: 0.25; } }
+@keyframes sirenB { 0% { opacity: 0; } 25% { opacity: 0.4; } 50% { opacity: 1; } 75% { opacity: 0.25; } }
 
 #vignette {
     position: absolute; left: 0; top: 0; right: 0; bottom: 0;
-    background-image: -webkit-radial-gradient(50% 45%, circle cover, rgba(0,0,0,0) 45%, rgba(0,0,0,0.78) 100%);
-    background-image: radial-gradient(circle at 50% 45%, rgba(0,0,0,0) 45%, rgba(0,0,0,0.78) 100%);
+    background-image: -webkit-radial-gradient(50% 45%, circle cover, rgba(0,0,0,0) 40%, rgba(20,0,0,0.85) 100%);
+    background-image: radial-gradient(circle at 50% 45%, rgba(0,0,0,0) 40%, rgba(20,0,0,0.85) 100%);
 }
+
+/* crime scene tape */
+.tape { position: absolute; height: 3.1em; line-height: 3.1em; white-space: nowrap; overflow: hidden;
+    background: #f2c400; color: #111; font-family: Impact, "Arial Black", sans-serif; font-size: 1em;
+    letter-spacing: 0.25em; box-shadow: 0 0.3em 1em rgba(0,0,0,0.7); }
+.tape span { font-size: 1.45em; }
+#tape1 { left: -6em; top: 6.5em; width: 46em; -webkit-transform: rotate(-11deg); transform: rotate(-11deg); }
+#tape2 { right: -8em; top: 9em; width: 44em; -webkit-transform: rotate(9deg); transform: rotate(9deg); }
 
 /* ---- title ---- */
 #title { position: absolute; left: 0; right: 0; top: 13%; text-align: center; }
-#welcome { font-size: 1.15em; letter-spacing: 0.7em; color: #9a9aa6; margin-left: 0.7em; }
+#welcome { font-size: 1.15em; letter-spacing: 0.7em; color: #a89090; margin-left: 0.7em; }
+#basedwrap { position: relative; display: inline-block; }
 #based {
     font-family: Impact, "Arial Black", "Franklin Gothic Heavy", sans-serif;
     font-size: 11.5em; line-height: 1; letter-spacing: 0.06em; margin: 0.08em 0 0 0.06em;
     color: #ffd14a;
-    text-shadow: 0 0 0.35em rgba(255, 190, 40, 0.35), 0 0.04em 0 #a8791a, 0 0.09em 0.12em rgba(0,0,0,0.8);
+    text-shadow: 0 0 0.3em rgba(255, 60, 30, 0.35), 0 0.04em 0 #a8791a, 0 0.09em 0.12em rgba(0,0,0,0.85);
 }
+#drips { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 1; }
 #zcity {
+    position: relative; z-index: 2;
     font-family: Impact, "Arial Black", sans-serif;
-    font-size: 3.6em; letter-spacing: 0.55em; margin-left: 0.55em; color: #f2f2f6;
+    font-size: 3.6em; letter-spacing: 0.55em; margin-left: 0.55em; color: #f2eded;
     text-shadow: 0 0.08em 0.2em rgba(0,0,0,0.9);
 }
-#rule { width: 34em; height: 0.18em; margin: 1.1em auto 0.9em auto; background: #d65a5a;
-    background-image: -webkit-linear-gradient(left, rgba(214,90,90,0), #d65a5a 20%, #ffd14a 50%, #d65a5a 80%, rgba(214,90,90,0));
-    background-image: linear-gradient(to right, rgba(214,90,90,0), #d65a5a 20%, #ffd14a 50%, #d65a5a 80%, rgba(214,90,90,0)); }
-#tagline { font-size: 1.35em; letter-spacing: 0.4em; margin-left: 0.4em; color: #c9c9d2; }
-#tagline b { color: #e0605f; font-weight: 700; }
+#rule { width: 34em; height: 0.18em; margin: 1.1em auto 0.9em auto; background: #b3121a;
+    background-image: -webkit-linear-gradient(left, rgba(179,18,26,0), #b3121a 20%, #ff3b30 50%, #b3121a 80%, rgba(179,18,26,0));
+    background-image: linear-gradient(to right, rgba(179,18,26,0), #b3121a 20%, #ff3b30 50%, #b3121a 80%, rgba(179,18,26,0)); }
+#tagline { font-size: 1.35em; letter-spacing: 0.4em; margin-left: 0.4em; color: #d2c6c6; }
+#tagline b { color: #ff3b30; font-weight: 700; }
+
+#holes { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; }
 
 /* ---- bottom panel ---- */
 #panel {
     position: absolute; left: 0; right: 0; bottom: 0; height: 15.5em;
-    background: rgba(9, 9, 12, 0.96);
-    border-top: 0.14em solid #ffd14a;
+    background: rgba(10, 5, 6, 0.96);
+    border-top: 0.16em solid #b3121a;
 }
+#paneldrips { position: absolute; left: 0; top: 0; width: 100%; height: 3em; }
 #left { position: absolute; left: 4em; top: 2em; width: 52em; }
 #right { position: absolute; right: 4em; top: 2em; width: 46em; }
 
-.label { font-size: 0.85em; letter-spacing: 0.35em; color: #7d7d88; font-weight: 700; }
-.value { font-size: 1.45em; color: #f0f0f5; margin: 0.15em 0 0.8em 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.label { font-size: 0.85em; letter-spacing: 0.35em; color: #8a7272; font-weight: 700; }
+.value { font-size: 1.45em; color: #f5efef; margin: 0.15em 0 0.8em 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .col { display: inline-block; vertical-align: top; margin-right: 3.5em; }
 
-#status { font-size: 1.05em; color: #c9c9d2; margin-top: 0.2em; height: 1.5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#barwrap { position: relative; height: 0.7em; margin-top: 0.7em; background: rgba(255,255,255,0.08); border-radius: 0.35em; overflow: hidden; }
-#bar { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; background: #ffd14a; border-radius: 0.35em;
+#status { font-size: 1.05em; color: #d2c6c6; margin-top: 0.2em; height: 1.5em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#barwrap { position: relative; height: 0.7em; margin-top: 0.7em; background: rgba(255,60,50,0.10); border-radius: 0.35em; overflow: hidden; }
+#bar { position: absolute; left: 0; top: 0; bottom: 0; width: 0%; border-radius: 0.35em;
+    background: #b3121a;
+    background-image: -webkit-linear-gradient(left, #5a0408, #b3121a 60%, #ff3b30);
+    background-image: linear-gradient(to right, #5a0408, #b3121a 60%, #ff3b30);
     -webkit-transition: width 0.4s ease; transition: width 0.4s ease; }
-#files { font-size: 0.95em; color: #8d8d98; margin-top: 0.55em; }
+#files { font-size: 0.95em; color: #8f7f7f; margin-top: 0.55em; }
 
-#tipbox { border-left: 0.2em solid #d65a5a; padding: 0.2em 0 0.2em 1.2em; height: 5.6em; }
-#tip { font-size: 1.4em; line-height: 1.45; color: #e4e4ea; margin-top: 0.3em;
+#tipbox { border-left: 0.2em solid #b3121a; padding: 0.2em 0 0.2em 1.2em; height: 5.6em; }
+#tip { font-size: 1.4em; line-height: 1.45; color: #ebe4e4; margin-top: 0.3em;
     -webkit-transition: opacity 0.5s ease; transition: opacity 0.5s ease; }
-#foot { font-size: 1em; color: #9a9aa6; margin-top: 1.2em; }
+#foot { font-size: 1em; color: #a89090; margin-top: 1.2em; }
 #foot b { color: #ffd14a; font-weight: 600; }
 
-/* static mode: no live panel content, just the art and the community line */
 body.static #left, body.static #tipbox { display: none; }
 body.static #right { left: 0; right: 0; width: auto; text-align: center; top: 4.4em; }
 body.static #panel { height: 11em; }
-body.static #skyline, body.static #glow { bottom: 11em; }
+body.static #skyline, body.static #sirenRed, body.static #sirenBlue { bottom: 11em; }
 body.static #skyline { height: 40%; }
 body.static #foot { font-size: 1.5em; margin-top: 0; }
 body.static #title { top: 11%; }
@@ -111,19 +139,30 @@ body.static #title { top: 11%; }
 <body>
 <div id="bg"></div>
 <div id="rain"></div>
-<div id="glow"></div>
+<svg id="splatter" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice"></svg>
+<div id="sirenRed"></div>
+<div id="sirenBlue"></div>
 <svg id="skyline" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 500" preserveAspectRatio="xMidYMax slice"></svg>
 <div id="vignette"></div>
 
+<div class="tape" id="tape1"><span>CRIME SCENE &nbsp;&#9650;&nbsp; DO NOT CROSS &nbsp;&#9650;&nbsp; CRIME SCENE &nbsp;&#9650;&nbsp; DO NOT CROSS &nbsp;&#9650;&nbsp; CRIME SCENE</span></div>
+<div class="tape" id="tape2"><span>DO NOT CROSS &nbsp;&#9650;&nbsp; CRIME SCENE &nbsp;&#9650;&nbsp; DO NOT CROSS &nbsp;&#9650;&nbsp; CRIME SCENE &nbsp;&#9650;&nbsp; DO NOT CROSS</span></div>
+
 <div id="title">
     <div id="welcome">WELCOME TO</div>
-    <div id="based">BASED</div>
+    <div id="basedwrap">
+        <div id="based">BASED</div>
+        <svg id="drips" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" preserveAspectRatio="none"></svg>
+    </div>
     <div id="zcity">Z-CITY</div>
     <div id="rule"></div>
     <div id="tagline"><b>HOMICIDE</b> &nbsp;+&nbsp; CUSTOM MODES</div>
 </div>
 
+<svg id="holes" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice"></svg>
+
 <div id="panel">
+    <svg id="paneldrips" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 48" preserveAspectRatio="none"></svg>
     <div id="left">
         <div class="col"><div class="label">MAP</div><div class="value" id="map">...</div></div>
         <div class="col"><div class="label">SLOTS</div><div class="value" id="players">...</div></div>
@@ -146,7 +185,6 @@ body.static #title { top: 11%; }
     var isStatic = window.location.search.indexOf("static") !== -1;
     if (isStatic) { document.body.className = "static"; }
 
-    // Scale everything (em units) to the window, designed at 1920x1080.
     function fit() {
         var s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
         document.body.style.fontSize = (16 * s) + "px";
@@ -157,34 +195,99 @@ body.static #title { top: 11%; }
     function el(id) { return document.getElementById(id); }
     function setText(id, t) { var e = el(id); if (e) { e.innerHTML = ""; e.appendChild(document.createTextNode(t)); } }
 
-    // ---- skyline: deterministic pseudo-random buildings + lit windows ----
     var NS = "http://www.w3.org/2000/svg";
-    var svg = el("skyline");
     var seed = 1337;
     function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
-    function add(tag, attrs) {
+    function add(svg, tag, attrs) {
         var n = document.createElementNS(NS, tag);
         for (var k in attrs) { if (attrs.hasOwnProperty(k)) { n.setAttribute(k, attrs[k]); } }
         svg.appendChild(n);
         return n;
     }
+
+    // ---- blood splatter: an irregular core of overlapping blobs, then
+    //      droplets flung outward, elongated along their direction of travel ----
+    function splat(svg, cx, cy, size, alpha) {
+        var g = add(svg, "g", { opacity: alpha });
+        var col = "#6d0a0e";
+        for (var c = 0; c < 9; c++) {
+            var ca = rnd() * Math.PI * 2, cd = size * rnd() * 0.45;
+            add(g, "circle", { cx: (cx + Math.cos(ca) * cd).toFixed(1), cy: (cy + Math.sin(ca) * cd).toFixed(1),
+                r: (size * (0.25 + rnd() * 0.35)).toFixed(1), fill: col });
+        }
+        for (var i = 0; i < 34; i++) {
+            var a = rnd() * Math.PI * 2;
+            var d = size * (0.7 + rnd() * 2.2);
+            var r = size * (0.03 + rnd() * 0.12) * (1.3 - d / (size * 3));
+            if (r < 1.2) { r = 1.2; }
+            var px = cx + Math.cos(a) * d, py = cy + Math.sin(a) * d;
+            add(g, "ellipse", { cx: px.toFixed(1), cy: py.toFixed(1), rx: (r * (1.6 + rnd())).toFixed(1), ry: r.toFixed(1), fill: col,
+                transform: "rotate(" + (a * 180 / Math.PI).toFixed(0) + " " + px.toFixed(1) + " " + py.toFixed(1) + ")" });
+        }
+    }
+    var sp = el("splatter");
+    splat(sp, 560, 330, 70, 0.55);
+    splat(sp, 1390, 250, 55, 0.5);
+    splat(sp, 1660, 560, 40, 0.45);
+    splat(sp, 250, 520, 34, 0.4);
+
+    // ---- blood running off the bottom of BASED ----
+    var dr = el("drips");
+    var base = 88;
+    for (var k2 = 0; k2 < 14; k2++) {
+        var x = 60 + rnd() * 880;
+        var w = 5 + rnd() * 8;
+        var len2 = 4 + rnd() * 16;
+        add(dr, "rect", { x: x.toFixed(1), y: (base - 6).toFixed(1), width: w.toFixed(1), height: len2.toFixed(1), fill: "#8f0a10" });
+        add(dr, "ellipse", { cx: (x + w / 2).toFixed(1), cy: (base - 6 + len2).toFixed(1), rx: (w * 0.75).toFixed(1), ry: (w * 0.2).toFixed(1), fill: "#8f0a10" });
+    }
+
+    // ---- drips hanging from the panel's top edge ----
+    var pd = el("paneldrips");
+    for (var k3 = 0; k3 < 40; k3++) {
+        var px = rnd() * 1920;
+        var pw = 4 + rnd() * 9;
+        var pl = 6 + rnd() * 30;
+        add(pd, "rect", { x: px.toFixed(1), y: "0", width: pw.toFixed(1), height: pl.toFixed(1), rx: (pw / 2).toFixed(1), fill: "#7a0a0f" });
+        add(pd, "circle", { cx: (px + pw / 2).toFixed(1), cy: pl.toFixed(1), r: (pw * 0.7).toFixed(1), fill: "#7a0a0f" });
+    }
+
+    // ---- bullet holes in the "glass" ----
+    var hs = el("holes");
+    function hole(cx, cy, s) {
+        for (var i = 0; i < 9; i++) {
+            var a = rnd() * Math.PI * 2;
+            var l = s * (2.5 + rnd() * 4);
+            add(hs, "line", { x1: cx, y1: cy, x2: (cx + Math.cos(a) * l).toFixed(1), y2: (cy + Math.sin(a) * l).toFixed(1),
+                stroke: "#ffffff", "stroke-width": "1.2", opacity: (0.18 + rnd() * 0.22).toFixed(2) });
+        }
+        add(hs, "circle", { cx: cx, cy: cy, r: s * 1.6, fill: "none", stroke: "#ffffff", "stroke-width": "1", opacity: "0.25" });
+        add(hs, "circle", { cx: cx, cy: cy, r: s, fill: "#050303" });
+        add(hs, "circle", { cx: cx, cy: cy, r: s, fill: "none", stroke: "#bbbbbb", "stroke-width": "1.5", opacity: "0.6" });
+    }
+    hole(1520, 420, 9);
+    hole(1590, 470, 7);
+    hole(340, 300, 8);
+
+    // ---- skyline ----
+    var svg = el("skyline");
     function layer(color, minH, maxH, minW, maxW, windows) {
         var x = -20;
         while (x < 1940) {
             var w = minW + rnd() * (maxW - minW);
             var h = minH + rnd() * (maxH - minH);
             var y = 500 - h;
-            add("rect", { x: x.toFixed(1), y: y.toFixed(1), width: (w + 1).toFixed(1), height: h.toFixed(1), fill: color });
-            if (rnd() < 0.25) {   // rooftop antenna / water tank
-                add("rect", { x: (x + w * 0.3).toFixed(1), y: (y - 18).toFixed(1), width: "3", height: "18", fill: color });
+            add(svg, "rect", { x: x.toFixed(1), y: y.toFixed(1), width: (w + 1).toFixed(1), height: h.toFixed(1), fill: color });
+            if (rnd() < 0.25) {
+                add(svg, "rect", { x: (x + w * 0.3).toFixed(1), y: (y - 18).toFixed(1), width: "3", height: "18", fill: color });
             }
             if (windows) {
                 for (var wy = y + 14; wy < 490; wy += 22) {
                     for (var wx = x + 9; wx < x + w - 10; wx += 17) {
-                        if (rnd() < 0.2) {
-                            var warm = rnd() < 0.8;
-                            add("rect", { x: wx.toFixed(1), y: wy.toFixed(1), width: "7", height: "10",
-                                fill: warm ? "#ffd14a" : "#9fb4d8", opacity: (0.35 + rnd() * 0.55).toFixed(2) });
+                        if (rnd() < 0.18) {
+                            var warm = rnd() < 0.75;
+                            add(svg, "rect", { x: wx.toFixed(1), y: wy.toFixed(1), width: "7", height: "10",
+                                fill: warm ? "#ffcf6a" : (rnd() < 0.5 ? "#ff4a3d" : "#9fb4d8"), opacity: (0.3 + rnd() * 0.55).toFixed(2) });
                         }
                     }
                 }
@@ -192,9 +295,9 @@ body.static #title { top: 11%; }
             x += w + (rnd() < 0.3 ? 6 + rnd() * 20 : 0);
         }
     }
-    layer("#1f1e26", 200, 380, 60, 150, false);   // far, lit by the glow behind
-    layer("#121217", 120, 300, 70, 170, true);    // near, with windows
-    add("rect", { x: "0", y: "488", width: "1920", height: "12", fill: "#09090c" });
+    layer("#241416", 200, 380, 60, 150, false);
+    layer("#120b0c", 120, 300, 70, 170, true);
+    add(svg, "rect", { x: "0", y: "488", width: "1920", height: "12", fill: "#0a0607" });
 
     // ---- tips ----
     var tips = [
@@ -206,7 +309,9 @@ body.static #title { top: 11%; }
         "At the end of a round everyone votes on what comes next. SPECIAL opens a second vote.",
         "Killing teammates costs karma. Hit zero and you're banned for a while.",
         "Every special round has its own abilities. Type !guide in chat to read them all.",
-        "An arterial bleed needs a tourniquet - and it needs it fast."
+        "An arterial bleed needs a tourniquet - and it needs it fast.",
+        "Found a body in Homicide? Press F2 to examine it.",
+        "Every hour you play earns a point. Type !store to spend them."
     ];
     var tipIndex = Math.floor(Math.random() * tips.length);
     function nextTip() {
@@ -223,7 +328,6 @@ body.static #title { top: 11%; }
 
     // ---- GMod loading screen API ----
     var total = 0, needed = 0;
-
     function updateBar() {
         if (total <= 0) { return; }
         var done = Math.max(total - needed, 0);
@@ -231,7 +335,6 @@ body.static #title { top: 11%; }
         el("bar").style.width = pct + "%";
         setText("files", "Files " + done + " / " + total + "  (" + pct + "%)  -  first visit downloads about 13 GB, only once.");
     }
-
     window.GameDetails = function (servername, serverurl, mapname, maxplayers, steamid, gamemode) {
         if (mapname) { setText("map", mapname); }
         if (maxplayers) { setText("players", maxplayers + " players"); }
