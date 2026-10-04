@@ -120,6 +120,9 @@ body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: #e8e2e2; font-
     background-image: linear-gradient(to right, #5a0408, #b3121a 60%, #ff3b30);
     -webkit-transition: width 0.4s ease; transition: width 0.4s ease; }
 #files { font-size: 0.95em; color: #8f7f7f; margin-top: 0.55em; }
+#firstjoin { font-size: 1.05em; line-height: 1.4; color: #ffd14a; margin-top: 0.55em; }
+#firstjoin b { color: #ffffff; letter-spacing: 0.08em; }
+#elapsed { margin-left: 1.2em; letter-spacing: 0.1em; color: #a89090; font-weight: 400; }
 
 #tipbox { border-left: 0.2em solid #b3121a; padding: 0.2em 0 0.2em 1.2em; height: 5.6em; }
 #tip { font-size: 1.4em; line-height: 1.45; color: #ebe4e4; margin-top: 0.3em;
@@ -166,10 +169,11 @@ body.static #title { top: 11%; }
     <div id="left">
         <div class="col"><div class="label">MAP</div><div class="value" id="map">...</div></div>
         <div class="col"><div class="label">SLOTS</div><div class="value" id="players">...</div></div>
-        <div class="label">LOADING</div>
+        <div class="label">LOADING<span id="elapsed"></span></div>
         <div id="status">Connecting to the city...</div>
         <div id="barwrap"><div id="bar"></div></div>
-        <div id="files">First visit downloads about 13 GB of content - it only happens once.</div>
+        <div id="files"></div>
+        <div id="firstjoin"><b>FIRST TIME HERE?</b> ~9 GB downloads once - it can look stuck, it isn't. Next time: seconds.</div>
     </div>
     <div id="right">
         <div id="tipbox">
@@ -366,7 +370,7 @@ body.static #title { top: 11%; }
         var pct = Math.max(0, Math.min(100, Math.round(done / total * 100)));
         window.ZCLoadFrac = pct / 100;
         el("bar").style.width = pct + "%";
-        setText("files", "Files " + done + " / " + total + "  (" + pct + "%)  -  first visit downloads about 13 GB, only once.");
+        setText("files", "Files " + done + " / " + total + "  (" + pct + "%)");
     }
     window.GameDetails = function (servername, serverurl, mapname, maxplayers, steamid, gamemode) {
         if (mapname) { setText("map", mapname); }
@@ -383,6 +387,14 @@ body.static #title { top: 11%; }
         if (status) { setText("status", status); }
         if (/sending client info/i.test(status || "")) { el("bar").style.width = "100%"; window.ZCLoadFrac = 1; }
     };
+    // running clock so a long download never looks frozen
+    var t0 = Date.now();
+    if (!isStatic) {
+        setInterval(function () {
+            var s = Math.floor((Date.now() - t0) / 1000);
+            setText("elapsed", Math.floor(s / 60) + ":" + (s % 60 < 10 ? "0" : "") + (s % 60));
+        }, 1000);
+    }
     // ?demo fakes a download so the page can be previewed in a browser
     if (window.location.search.indexOf("demo") !== -1) {
         window.GameDetails("", "", "gm_building_v2", 25);
