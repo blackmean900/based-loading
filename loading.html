@@ -123,6 +123,7 @@ body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; color: #e8e2e2; font-
 #firstjoin { font-size: 1.05em; line-height: 1.4; color: #ffd14a; margin-top: 0.55em; }
 #firstjoin b { color: #ffffff; letter-spacing: 0.08em; }
 #elapsed { margin-left: 1.2em; letter-spacing: 0.1em; color: #a89090; font-weight: 400; }
+#livecount { font-size: 1.05em; color: #7be08a; margin-top: 0.4em; letter-spacing: 0.04em; }
 
 #tipbox { border-left: 0.2em solid #b3121a; padding: 0.2em 0 0.2em 1.2em; height: 5.6em; }
 #tip { font-size: 1.4em; line-height: 1.45; color: #ebe4e4; margin-top: 0.3em;
@@ -174,6 +175,7 @@ body.static #title { top: 11%; }
         <div id="barwrap"><div id="bar"></div></div>
         <div id="files"></div>
         <div id="firstjoin"><b>FIRST TIME HERE?</b> ~11 GB downloads once - it can look stuck, it isn't. Next time: seconds.</div>
+        <div id="livecount"></div>
     </div>
     <div id="right">
         <div id="tipbox">
@@ -387,6 +389,26 @@ body.static #title { top: 11%; }
         if (status) { setText("status", status); }
         if (/sending client info/i.test(status || "")) { el("bar").style.width = "100%"; window.ZCLoadFrac = 1; }
     };
+    // live player count (2026-10-08): the VPS writes /status.json every minute.
+    // Only works when this page is served from the game server itself (plain
+    // http) - from GitHub Pages the request is blocked and the line stays empty.
+    function liveCount() {
+        try {
+            var x = new XMLHttpRequest();
+            x.open("GET", "/status.json?t=" + Date.now(), true);
+            x.onload = function () {
+                try {
+                    var d = JSON.parse(x.responseText);
+                    if (d && d.players > 0) {
+                        setText("livecount", d.players + (d.players === 1 ? " player is" : " players are") + " in the game right now - hang in there, they're waiting.");
+                    }
+                } catch (e) {}
+            };
+            x.send();
+        } catch (e) {}
+    }
+    liveCount();
+    if (!isStatic) { setInterval(liveCount, 30000); }
     // running clock so a long download never looks frozen
     var t0 = Date.now();
     if (!isStatic) {
